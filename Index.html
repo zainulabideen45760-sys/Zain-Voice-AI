@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zain Voice AI</title>
+<style>
+:root{--bg:#070511;--p:#6C2BFF;--v:#8B5CFF;--c:#21C7FF;--w:#F7F5FF;--t2:#AAA5BD;--ok:#35E6A0;--err:#FF4D6D;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.1);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#F4F1FF;--w:#1B1233;--t2:#5E5878;--glass:rgba(108,43,255,.07);--line:rgba(108,43,255,.15)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--w);font-family:Inter,Roboto,system-ui,sans-serif;display:flex;justify-content:center}
+.app{width:100%;max-width:440px;min-height:100%;padding:20px 20px 28px;display:flex;flex-direction:column;gap:18px;background:radial-gradient(120% 60% at 50% 25%,rgba(108,43,255,.28),transparent 70%)}
+header{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.z{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--c));display:grid;place-items:center;box-shadow:0 0 18px rgba(33,199,255,.35)}
+.icons{display:flex;gap:8px}
+.ib{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--glass);color:var(--w);cursor:pointer;font-size:16px}
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px;padding:10px 0 4px}
+.orbwrap{position:relative;width:220px;height:220px;display:grid;place-items:center}
+.orb{width:170px;height:170px;border:0;border-radius:50%;cursor:pointer;color:#fff;background:radial-gradient(circle at 35% 30%,var(--c),var(--v) 45%,var(--p) 80%);box-shadow:0 0 60px rgba(139,92,255,.6),inset 0 0 30px rgba(255,255,255,.25);animation:breathe 4s ease-in-out infinite}
+.ring{position:absolute;inset:8px;border-radius:50%;border:2px solid transparent;border-top-color:var(--c);opacity:0;transition:opacity .3s}
+.orbwrap[data-s=listening] .orb{animation:pulse .7s ease-in-out infinite}
+.orbwrap[data-s=processing] .ring{opacity:1;animation:spin 1s linear infinite}
+.orbwrap[data-s=executing] .orb{animation:pulse 1.1s ease-in-out infinite;filter:hue-rotate(-20deg)}
+.orbwrap[data-s=success] .orb{background:radial-gradient(circle at 35% 30%,#b6ffe3,var(--ok) 60%,#0c8a5c);box-shadow:0 0 60px rgba(53,230,160,.6)}
+.orbwrap[data-s=error] .orb{background:radial-gradient(circle at 35% 30%,#ffc2cd,var(--err) 60%,#8a1230);box-shadow:0 0 60px rgba(255,77,109,.6)}
+@keyframes breathe{50%{transform:scale(1.05)}}
+@keyframes pulse{50%{transform:scale(1.12)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.wave{display:flex;gap:4px;height:26px;align-items:center;opacity:0;transition:opacity .3s}
+.orbwrap[data-s=listening]~.wave{opacity:1}
+.wave i{width:4px;height:6px;border-radius:2px;background:var(--c);animation:bar .6s ease-in-out infinite alternate}
+.wave i:nth-child(2n){animation-delay:.15s}.wave i:nth-child(3n){animation-delay:.3s}
+@keyframes bar{to{height:24px}}
+#state{font-size:20px;font-weight:600}
+#heard{min-height:22px;color:var(--t2);font-size:15px;text-align:center}
+#reply{min-height:22px;font-size:15px;text-align:center}
+.card{border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:14px}
+h2{font-size:15px;font-weight:600;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--glass);color:var(--w);border-radius:999px;padding:8px 14px;font-size:14px;cursor:pointer}
+.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.app-i{text-align:center;font-size:12px;color:var(--t2)}
+.app-i b{width:100%;aspect-ratio:1;border-radius:14px;display:grid;place-items:center;font-size:20px;margin-bottom:6px;background:linear-gradient(135deg,rgba(108,43,255,.5),rgba(33,199,255,.35));color:#fff}
+.app-i em{display:block;font-style:normal;color:var(--ok);font-size:11px}
+ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px}
+li{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+li span:last-child{color:var(--ok);white-space:nowrap}
+.status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);justify-content:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+<div class="brand"><div class="z"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14L5 19h14"/></svg></div>Zain Voice AI</div>
+<div class="icons"><button class="ib" id="theme" aria-label="Theme">◐</button><button class="ib" aria-label="History">⟲</button><button class="ib" aria-label="Settings">⚙</button></div>
+</header>
+<section class="stage">
+<div class="orbwrap" id="orb" data-s="idle"><div class="ring"></div><button class="orb" id="mic" aria-label="Tap to speak">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
+<div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div id="state">Tap to Speak</div>
+<div id="heard"></div>
+<div id="reply"></div>
+<div class="status"><span class="dot"></span>Mic off · Hey Zain band hai</div>
+</section>
+<section class="card"><h2>Quick actions</h2>
+<div class="chips" id="chips">
+<button class="chip">WhatsApp खोलो</button>
+<button class="chip">YouTube पर AI news search करो</button>
+<button class="chip">Ali को message करो</button>
+<button class="chip">Bluetooth on करो</button>
+</div></section>
+<section class="card"><h2>Connected apps</h2>
+<div class="apps">
+<div class="app-i"><b>W</b>WhatsApp<em>Messaging</em></div>
+<div class="app-i"><b>▶</b>YouTube<em>Search</em></div>
+<div class="app-i"><b>C</b>Chrome<em>Search</em></div>
+<div class="app-i"><b>M</b>Maps<em>Navigate</em></div>
+</div></section>
+<section class="card"><h2>Recent commands</h2>
+<ul id="hist">
+<li><span>🎙 “WhatsApp खोलो”</span><span>✓ Done</span></li>
+<li><span>🎙 “YouTube पर AI news search करो”</span><span>✓ Done</span></li>
+</ul></section>
+</main>
+<script>
+(function(){
+var orb=document.getElementById('orb'),st=document.getElementById('state'),hd=document.getElementById('heard'),rp=document.getElementById('reply'),hist=document.getElementById('hist'),busy=false;
+function set(s,t){orb.dataset.s=s;st.textContent=t}
+function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function reply(c){
+var l=c.toLowerCase();
+if(l.indexOf('whatsapp')>-1&&l.indexOf('message')>-1)return['Ali का chat खोल रहा हूँ।','Ready to message Ali'];
+if(l.indexOf('whatsapp')>-1)return['WhatsApp खोल रहा हूँ।','Opening WhatsApp…'];
+if(l.indexOf('youtube')>-1)return['Search कर रहा हूँ।','Searching YouTube…'];
+if(l.indexOf('bluetooth')>-1)return['Bluetooth settings खोल रहा हूँ।','Opening Settings…'];
+if(l.indexOf('message')>-1)return['मुझे दो Ali contacts मिले हैं।','Choose a contact'];
+return['ठीक है।','Working…'];
+}
+async function run(cmd){
+if(busy)return;busy=true;rp.textContent='';
+set('listening','Listening…');hd.textContent='';
+var words=cmd.split(' ');
+for(var i=0;i<words.length;i++){hd.textContent='“'+words.slice(0,i+1).join(' ')+'”';await wait(180)}
+set('processing','Understanding…');await wait(900);
+var r=reply(cmd);rp.textContent=r[0];
+set('executing',r[1]);await wait(1200);
+var amb=r[1]==='Choose a contact';
+set(amb?'error':'success',amb?'Need your choice':'Done');
+var li=document.createElement('li');li.innerHTML='<span></span><span></span>';
+li.children[0].textContent='🎙 “'+cmd+'”';li.children[1].textContent=amb?'? Pending':'✓ Done';
+if(amb)li.children[1].style.color='var(--err)';
+hist.insertBefore(li,hist.firstChild);
+await wait(1800);set('idle','Tap to Speak');hd.textContent='';busy=false;
+}
+document.getElementById('mic').onclick=function(){run('WhatsApp खोलो और Ali को message करो')};
+document.getElementById('chips').onclick=function(e){if(e.target.classList.contains('chip'))run(e.target.textContent)};
+document.getElementById('theme').onclick=function(){var d=document.documentElement;d.dataset.theme=d.dataset.theme==='light'?'dark':'light'};
+})();
+</script>
+</body>
+</html>
